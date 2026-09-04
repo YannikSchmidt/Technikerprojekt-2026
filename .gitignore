@@ -1,0 +1,34 @@
+###############################################################################
+# Whitelist: Der Projects-Ordner enthaelt viele Altprojekte, die NICHT ins
+# Backup gehoeren. Deshalb wird erst alles ignoriert und danach werden gezielt
+# nur die drei aktiven PlatformIO-Projekte wieder eingeschlossen.
+# Neue Projekte muessen hier explizit ergaenzt werden, sonst bleiben sie aussen vor.
+###############################################################################
+/*
+
+!/.gitignore
+!/README.md
+!/Projekt_Logger/
+!/ProjektTest/
+!/Projekt_Sensor/
+
+###############################################################################
+# Netzwerkkonfiguration: Die echten Adressen der Anlage duerfen nicht ins
+# oeffentliche Repository. Versioniert wird nur die Vorlage
+# network_config.example.h, die jeder nach network_config.h kopiert.
+###############################################################################
+network_config.h
+
+###############################################################################
+# Innerhalb der Projekte: Build-Artefakte und maschinenlokale Editor-Dateien
+###############################################################################
+.pio/
+.vscode/.browse.c_cpp.db*
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/ipch/
+
+# Betriebssystem-Muell
+Thumbs.db
+desktop.ini
+.DS_Store
