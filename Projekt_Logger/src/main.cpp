@@ -2,9 +2,6 @@
 // Technikerprojekt 2026 - Datenlogger (Modbus-Master)
 // Liest die Stromwerte des Sensorknotens, speichert sie auf SD und stellt
 // sie als Webseite und CSV bereit. Hardware: WT32-ETH01 (ESP32 + LAN8720).
-//
-// Namenskonvention: Bezeichner englisch, Kommentare deutsch.
-// Fachbegriffe (Modbus, GAK, NTP, SPI, CS/MOSI/MISO/SCK) bleiben unübersetzt.
 ///////////////////////////////////////////////////////////////////////////
 
 // --- WT32-ETH01 Pins ---
@@ -90,7 +87,7 @@ bool     firstReading = true;
 
 // --- getUnixTimestamp() --------------------------------------------------
 // Liest die aktuelle Zeit aus der internen Uhr des ESP32.
-// Rückgabe: Sekunden seit dem 01.01.1970.
+// Rückgabe: UnixTime - Sekunden seit dem 01.01.1970.
 uint32_t getUnixTimestamp() {
   time_t now;
   time(&now);

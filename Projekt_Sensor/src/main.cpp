@@ -1,10 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////
-// Technikerprojekt 2026 - Sensorknoten (Modbus-Slave)
+// Technikerprojekt 2026 - Sensor-Platine (Modbus-Client)
 // Misst den Strom in acht Strängen und stellt die Werte als Modbus-Register
 // bereit. Der Logger holt sie dort ab. Hardware: ESP32 DevKit v1.
-//
-// Namenskonvention: Bezeichner englisch, Kommentare deutsch.
-// Fachbegriffe (Modbus, GAK, RS485, ADC, Hreg) bleiben unübersetzt.
 ///////////////////////////////////////////////////////////////////////////
 
 #include <ModbusRTU.h>
