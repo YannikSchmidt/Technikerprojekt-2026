@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////
 // Technikerprojekt 2026 - Datenlogger (Modbus-Master)
-// Liest die Stromwerte des Sensorknotens, speichert sie auf SD und stellt
+// Liest die Stromwerte des Sensor-Platinen, speichert sie auf SD und stellt
 // sie als Webseite und CSV bereit. Hardware: WT32-ETH01 (ESP32 + LAN8720).
 ///////////////////////////////////////////////////////////////////////////
 
@@ -69,7 +69,8 @@ WebServer server(80);
 SPIClass sdSPI(VSPI); // VSPI für SD-Karte weil nicht Standard SPI Pins genutzt werden (V = Virtual)
 
 // --- Globale Status-Variablen (Fehlerüberwachung zur anzeige auf dem Webinterface) ---
-bool ethInitialized = false;
+bool ethStarted = false;      // Treiber laeuft, sagt noch nichts ueber Kabel oder IP
+bool ethInitialized = false;  // Link steht UND die feste IP ist gesetzt
 bool sdInitialized = false;
 bool modbusReady = false;
 unsigned long lastRetryMillis = 0;
@@ -144,21 +145,52 @@ void tryInitSD() {
 
 // --- tryInitETH() --------------------------------------------------------
 // Startet Ethernet mit fester IP und stellt anschließend die Uhr per NTP.
-// Kann wie tryInitSD() jederzeit erneut aufgerufen werden.
+// Arbeitet in drei Stufen (Treiber, Link, IP) und meldet jede einzeln, damit
+// bei "Webseite nicht erreichbar" am seriellen Monitor sofort erkennbar ist,
+// woran es liegt. Kann wie tryInitSD() jederzeit erneut aufgerufen werden.
 void tryInitETH() {
   if (ethInitialized) return;
-  if (ETH.begin(ETH_PHY_ADDR, ETH_PHY_POWER, ETH_PHY_MDC, ETH_PHY_MDIO, ETH_PHY_TYPE, ETH_CLK_MODE)) {
-    ETH.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS);   // feste IP statt DHCP
-    ethInitialized = true;
-    Serial.print("[OK] Ethernet gestartet. IP: ");
-    Serial.println(ETH.localIP());
 
-    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
-    setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 1);   // Zeitzonenregel DE, Sommerzeit rechnet der ESP32 selbst
-    tzset();
-  } else {
-    Serial.println("[FEHLER] Ethernet Init fehlgeschlagen!");
+  // Stufe 1: Treiber genau einmal starten. Ein zweiter ETH.begin() waere ein
+  // Fehler, weil der Treiber dann bereits laeuft.
+  if (!ethStarted) {
+    if (!ETH.begin(ETH_PHY_ADDR, ETH_PHY_POWER, ETH_PHY_MDC, ETH_PHY_MDIO, ETH_PHY_TYPE, ETH_CLK_MODE)) {
+      Serial.println("[FEHLER] Ethernet Init fehlgeschlagen! (PHY antwortet nicht)");
+      return;
+    }
+    ethStarted = true;
+    Serial.println("[OK] Ethernet-Treiber gestartet.");
   }
+
+  // Stufe 2: Ohne Link ist das Geraet nicht erreichbar. ETH.begin() liefert
+  // bereits true, wenn der Treiber laeuft - ein Kabel muss dafuer nicht stecken.
+  if (!ETH.linkUp()) {
+    Serial.println("[WARTEN] Kein Ethernet-Link. Kabel und Switch-Port pruefen.");
+    return;
+  }
+
+  // Stufe 3: feste IP statt DHCP. Rueckgabewert pruefen, sonst meldet das
+  // Geraet Erfolg, obwohl es gar keine Adresse hat.
+  if (!ETH.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS)) {
+    Serial.println("[FEHLER] IP-Konfiguration wurde abgelehnt!");
+    return;
+  }
+
+  // Gegenprobe: hat das Geraet wirklich die gewuenschte Adresse bekommen?
+  // IPAddress kennt nur operator==, deshalb die Verneinung aussen herum.
+  if (!(ETH.localIP() == local_IP)) {
+    Serial.print("[FEHLER] Abweichende IP-Adresse: ");
+    Serial.println(ETH.localIP());
+    return;
+  }
+
+  ethInitialized = true;
+  Serial.print("[OK] Ethernet bereit. IP: ");
+  Serial.println(ETH.localIP());
+
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+  setenv("TZ", "CET-1CEST,M3.5.0,M10.5.0/3", 1);   // Zeitzonenregel DE, Sommerzeit rechnet der ESP32 selbst
+  tzset();
 }
 
 
@@ -332,6 +364,13 @@ void setup() {
   delay(1000);
 
   tryInitETH();
+  // Die Aushandlung mit dem Switch dauert ein bis zwei Sekunden. Ohne diese
+  // kurze Wartezeit stuende der Link beim ersten Versuch nie und das Geraet
+  // waere erst nach dem naechsten Durchlauf des Fehler-Managers erreichbar.
+  unsigned long linkWait = millis();
+  while (ethStarted && !ETH.linkUp() && millis() - linkWait < 5000) delay(100);
+  tryInitETH();
+
   tryInitSD();
 
   // --- Modbus Initialisierung ---
