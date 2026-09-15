@@ -16,9 +16,9 @@ const uint16_t SLAVE_ID         = 1;               // = gakID
 const uint16_t MODBUS_START_REG = SLAVE_ID * 10;
 const uint16_t MODBUS_REG_COUNT = 2 + CHANNELS;
 const uint32_t MODBUS_BAUDRATE  = 9600;
-const uint16_t REG_PACKET = 0;   // Offsets im Registerblock
-const uint16_t REG_GAK    = 1;
-const uint16_t REG_VALUES = 2;
+const uint16_t REG_PACKET = 0;   // Adressen der Werte im Registerblock
+const uint16_t REG_GAK    = 1;   
+const uint16_t REG_VALUES = 2;   // ab Adresse 2 bis Adresse 9
 
 // --- RS485 Pins ---
 const int PIN_RS485_RX = 27;
@@ -40,7 +40,7 @@ const char*   SENSOR_NAMES[CHANNELS] = { "U1", "U2", "U3", "U4", "U5", "U6", "U7
 #define SENSOR_CYHCS_LSP25   1
 #define SENSOR_ACS758_100B   2
 
-#define SENSOR_TYPE  SENSOR_CYHCS_LSP25    // <<< hier die verbaute Platine eintragen
+#define SENSOR_TYPE  SENSOR_ACS758_100B    // <<< hier die verbaute Platine eintragen
 
 #if SENSOR_TYPE == SENSOR_CYHCS_LSP25
   const float SENSOR_SENSITIVITY = 0.080;   // 80 mV/A (CYHCS-LSP25)
@@ -80,7 +80,10 @@ const int VALID_SAMPLES  = NUM_SAMPLES - (2 * IGNORE_SAMPLES);
 const unsigned long MEASURE_INTERVAL    = 3000;
 const int           SAMPLES_PER_AVERAGE = 10;
 
+// --- Instanzen ---
 ModbusRTU mb;
+
+// --- Globale Variablen ---
 unsigned long previousSampleMillis = 0;
 int   currentSampleCount = 0;
 float currentSum[CHANNELS] = {0};    // aufaddierte Ampere-Werte
@@ -95,7 +98,7 @@ uint16_t packetNr = 0;
 // Führt eine Punktmessung aus: liest alle Kanäle mehrfach ein, entfernt die
 // Ausreißer, rechnet in Ampere um und addiert das Ergebnis auf currentSum.
 void readSensors() {
-  uint16_t raw_data[CHANNELS][NUM_SAMPLES];    // 2 kB, liegt auf dem Stack
+  uint16_t raw_data[CHANNELS][NUM_SAMPLES];
 
   // Kanäle verschachtelt einlesen, damit alle Stränge nahezu gleichzeitig erfasst werden
   for (int s = 0; s < NUM_SAMPLES; s++) {
@@ -165,7 +168,7 @@ void setup() {
   Serial.printf("Teilerfaktor %.4f, Empfindlichkeit am ESP32-Pin %.4f V/A\n", DIVIDER_RATIO, EFFECTIVE_SENSITIVITY);
   Serial.printf("Neuer Mittelwert alle %lu s\n", (MEASURE_INTERVAL * SAMPLES_PER_AVERAGE) / 1000UL);
 
-  Serial2.begin(MODBUS_BAUDRATE, SERIAL_8N1, PIN_RS485_RX, PIN_RS485_TX);   // 8N1 muss beim Logger identisch sein
+  Serial2.begin(MODBUS_BAUDRATE, SERIAL_8N1, PIN_RS485_RX, PIN_RS485_TX);
 
   if (PIN_RS485_RE_DE >= 0) {
     mb.begin(&Serial2, PIN_RS485_RE_DE);
@@ -174,7 +177,7 @@ void setup() {
   }
   mb.slave(SLAVE_ID);
 
-  // addHreg legt die Register an, ohne das antwortet der Slave mit "Illegal Data Address"
+  // hier werden die Modbus-Register mit 0 angelegt und anschließend die GAK-Nummer beschrieben.
   for (uint16_t i = 0; i < MODBUS_REG_COUNT; i++) mb.addHreg(MODBUS_START_REG + i, 0);
   mb.Hreg(MODBUS_START_REG + REG_GAK, SLAVE_ID);
 

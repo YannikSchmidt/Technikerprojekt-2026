@@ -365,8 +365,8 @@ void setup() {
 
   tryInitETH();
   // Die Aushandlung mit dem Switch dauert ein bis zwei Sekunden. Ohne diese
-  // kurze Wartezeit stuende der Link beim ersten Versuch nie und das Geraet
-  // waere erst nach dem naechsten Durchlauf des Fehler-Managers erreichbar.
+  // kurze Wartezeit steht der Link beim ersten Versuch nicht und das Gerät
+  // ist erst nach dem nächsten Durchlauf des Fehler-Managers erreichbar.
   unsigned long linkWait = millis();
   while (ethStarted && !ETH.linkUp() && millis() - linkWait < 5000) delay(100);
   tryInitETH();
