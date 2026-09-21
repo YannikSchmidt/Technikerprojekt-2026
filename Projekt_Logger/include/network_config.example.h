@@ -1,11 +1,10 @@
 #pragma once
 ///////////////////////////////////////////////////////////////////////////////
-// Vorlage fuer die Netzwerkkonfiguration.
+// Vorlage für die Netzwerkkonfiguration.
 //
 // Diese Datei nach "network_config.h" im selben Verzeichnis kopieren und die
-// Adressen des eigenen Netzes eintragen. "network_config.h" wird von .gitignore
-// ausgeschlossen und landet damit nicht im Repository, weil die tatsaechliche
-// Netzstruktur der Anlage nicht veroeffentlicht werden soll.
+// Adressen des eigenen Netzes eintragen. In "network_config.h" ist die tatsaechliche
+// Netzstruktur der Anlage und wird dadurch nicht veroeffentlicht.
 ///////////////////////////////////////////////////////////////////////////////
 #include <Arduino.h>
 

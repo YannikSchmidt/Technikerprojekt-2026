@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Technikerprojekt 2026 - Datenlogger (Modbus-Master)
+// Technikerprojekt 2026 - Datenlogger (Modbus-Client)
 // Liest die Stromwerte des Sensor-Platinen, speichert sie auf SD und stellt
 // sie als Webseite und CSV bereit. Hardware: WT32-ETH01 (ESP32 + LAN8720).
 ///////////////////////////////////////////////////////////////////////////
