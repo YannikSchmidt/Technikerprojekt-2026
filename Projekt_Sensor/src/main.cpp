@@ -37,13 +37,13 @@ const char*   SENSOR_NAMES[CHANNELS] = { "U1", "U2", "U3", "U4", "U5", "U6", "U7
 // Für beide Sensortypen existiert eine eigene Platine, sie sind tauschbar.
 // Nach einem Wechsel muss hier umgestellt UND neu kalibriert werden.
 ///////////////////////////////////////////////////////////////////////////
-#define SENSOR_CYHCS_LSP25   1
+#define SENSOR_CHK25LSP5S2L  1
 #define SENSOR_ACS758_100B   2
 
 #define SENSOR_TYPE  SENSOR_ACS758_100B    // <<< hier die verbaute Platine eintragen
 
-#if SENSOR_TYPE == SENSOR_CYHCS_LSP25
-  const float SENSOR_SENSITIVITY = 0.080;   // 80 mV/A (CYHCS-LSP25)
+#if SENSOR_TYPE == SENSOR_CHK25LSP5S2L
+  const float SENSOR_SENSITIVITY = 0.080;   // 80 mV/A (CHK25LSP5S2L)
   // Nullpunkte am Aufbau bei stromlosen Strängen gemessen
   const float V_OFFSET[CHANNELS] = {1.561, 1.553, 1.581, 1.557, 1.573, 1.546, 1.563, 1.563};
 #elif SENSOR_TYPE == SENSOR_ACS758_100B
@@ -51,7 +51,7 @@ const char*   SENSOR_NAMES[CHANNELS] = { "U1", "U2", "U3", "U4", "U5", "U6", "U7
   // Nullpunkte am Aufbau bei stromlosen Strängen gemessen
   const float V_OFFSET[CHANNELS] = {1.561, 1.553, 1.581, 1.557, 1.573, 1.546, 1.563, 1.563};
 #else
-  #error "SENSOR_TYPE muss SENSOR_CYHCS_LSP25 oder SENSOR_ACS758_100B sein"
+  #error "SENSOR_TYPE muss SENSOR_CHK25LSP5S2L oder SENSOR_ACS758_100B sein"
 #endif
 
 // --- Sensor Konstanten ---
@@ -160,8 +160,8 @@ void setup() {
   delay(500);
   Serial.println("\n\n--- ESP32 Modbus Sensor Knoten startet ---");
 
-#if SENSOR_TYPE == SENSOR_CYHCS_LSP25
-  Serial.println("Sensorplatine: CYHCS-LSP25 (80 mV/A)");
+#if SENSOR_TYPE == SENSOR_CHK25LSP5S2L
+  Serial.println("Sensorplatine: CHK25LSP5S2L (80 mV/A)");
 #else
   Serial.println("Sensorplatine: ACS758-100B (20 mV/A)");
 #endif
