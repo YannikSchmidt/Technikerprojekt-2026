@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Technikerprojekt 2026 - Sensor-Platine (Modbus-Client)
+// Technikerprojekt 2026 - Sensor-Platine (Modbus-Server)
 // Misst den Strom in acht Strängen und stellt die Werte als Modbus-Register
 // bereit. Der Logger holt sie dort ab. Hardware: ESP32 DevKit v1.
 ///////////////////////////////////////////////////////////////////////////
